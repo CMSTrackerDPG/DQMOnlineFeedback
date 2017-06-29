@@ -16,10 +16,10 @@ def dqm_get_json(server, run, dataset, folder, rootContent=False):
     data = eval(re.sub(r"\bnan\b", "0", urllib2.build_opener(X509CertOpen()).open(datareq).read()),
                { "__builtins__": None }, {})
     if rootContent:
-        # Now convert into real ROOT histograms   
+        # Now convert into real ROOT histograms
         for idx,item in enumerate(data['contents']):
             if 'obj' in item.keys():
-                if 'rootobj' in item.keys(): 
+                if 'rootobj' in item.keys():
                     a = array('B')
                     a.fromstring(item['rootobj'].decode('hex'))
                     t = TBufferFile(TBufferFile.kRead, len(a), a, False)
