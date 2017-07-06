@@ -3,20 +3,12 @@ import sqlite3
 import datetime
 
 conn = sqlite3.connect('alarms_log.db')
-c = conn.cursor()
+dbcursor = conn.cursor()
 try:
-    c.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE id=0 )')
+    dbcursor.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE id=0 )')
 except sqlite3.Error as exerror:
     if(exerror):
-        c.execute('''CREATE TABLE alarms(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
-#
-#c.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES ('2017-07-06',297726, 5, 80, 1)")
-#c.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES ('2017-07-06',297727, 5, 80, 1)")
-#conn.commit()
-
-c = conn.cursor()
-
-
+        dbcursor.execute('''CREATE TABLE alarms(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
 
 serverurl = 'https://cmsweb.cern.ch/dqm/online'
 
@@ -34,12 +26,14 @@ if(DQMMon.onlinePublishing):
     print(DQMMon.runinfo['run_type'])
     print(DQMMon.dead_value)
 
-    #if(DQMMon.runinfo['beamMode']=='stable' and DQMMon.runinfo['run_type']=='pp_run' and (DQMMon.dead_value>70)):
-    c.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE run="%s" )' % DQMMon.runinfo['run'])
-    alarm_handled, = c.fetchone()
-    print(alarm_handled)
-    if(alarm_handled!=1):
-        c.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, 1);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value))
-        conn.commit()
-
-        #DQMMon.refresh()
+    if(DQMMon.runinfo['beamMode']=='stable' and DQMMon.runinfo['run_type']=='pp_run' and (DQMMon.dead_value>70)):
+        #Run is written in db only if the sms/email has been sent
+        dbcursor.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE run="%s" )' % DQMMon.runinfo['run'])
+        alarm_handled, = c.fetchone()
+        print(alarm_handled)
+        if(alarm_handled!=1):
+            dbcursor.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, 1);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value))
+            conn.commit()
+            #Write the message in txt file(and db?)
+            #Do something to send sms and email
+            #DQMMon.refresh()
