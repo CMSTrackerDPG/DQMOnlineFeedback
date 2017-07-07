@@ -8,6 +8,9 @@ serverurl = 'https://cmsweb.cern.ch/dqm/online'
 #serverurl = 'http://cmstkdqm03.cern.ch:8060/dqm/dev'
 #serverurl = 'http://cmstkdqm02.cern.ch:8888/dqm/devtest'
 
+#proxy_file = "/data/users/cctrkdata/current/auth/proxy/proxy.cert"
+proxy_file = "./x509up_u22497"
+
 ident = "DQMToJson/1.0 python/%d.%d.%d" % sys.version_info[:3]
 HTTPS = httplib.HTTPSConnection
 
@@ -30,15 +33,15 @@ def x509_params():
  x509_path = os.getenv("X509_USER_PROXY", None)
  if x509_path and os.path.exists(x509_path):
 ##   key_file = cert_file = x509_path
-     key_file = cert_file = "/data/users/cctrkdata/current/auth/proxy/proxy.cert"
+     key_file = cert_file = proxy_file
 
  if not key_file:
-   x509_path = "/data/users/cctrkdata/current/auth/proxy/proxy.cert"
+   x509_path = proxy_file
    if os.path.exists(x509_path):
      key_file = x509_path
 
  if not cert_file:
-   x509_path = "/data/users/cctrkdata/current/auth/proxy/proxy.cert"
+   x509_path = proxy_file
    if os.path.exists(x509_path):
      cert_file = x509_path     
 
