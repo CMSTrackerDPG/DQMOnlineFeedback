@@ -7,9 +7,9 @@ class DQMInterface():
         self.serverurl = serverurl
         self.runinfo = {"run": 0, "lumi": 0, "beamMode": '', "run_type": ''}
         self.dead_value = 0
-        self.data_EventInfo = {}#= dqm_get_json(self.serverurl, RunNumber , "/Online/ALL", "/SiStrip/EventInfo", True)
-        self.data_LhcInfo = {}#= dqm_get_json(self.serverurl, RunNumber , "/Online/ALL", "/Info/LhcInfo", True)
-        self.onlinePublishing = False# = self.isOnlinePublishing()
+        self.data_EventInfo = {}
+        self.data_LhcInfo = {}
+        self.onlinePublishing = False
         self()
 
     def __call__(self):
@@ -38,5 +38,5 @@ class DQMInterface():
 
 
     def getdeadRocTrendLayer_1(self):
-        data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", self.runinfo['lumi'])
+        data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
         self.dead_value = data['deadRocTrendLayer_1']['rootobj'].GetBinContent(data['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])))
