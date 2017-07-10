@@ -6,11 +6,12 @@ import pickle
 X509CertAuth.ssl_key_file, X509CertAuth.ssl_cert_file = x509_params()
 
 def dqm_get_json(server, run, dataset, folder, rootContent=False):
-#    postfix = "?rootcontent=1" if rootContent else ""
 #    datareq = urllib2.Request(('%s/data/json/archive/%s/Global/%s%s') % (server, run, dataset, folder, postfix))
 #    datareq = urllib2.Request(('%s/data/json/archive/%s/%s/%s?rootcontent=1') % (server, run, dataset, folder)) #- offline?
-#    datareq = urllib2.Request(('%s/data/json/live/%s/Global/%s/%s?rootcontent=1') % (server, run, dataset, folder))
-    datareq = urllib2.Request(('%s/data/json/archive/%s/Global/%s/%s?rootcontent=1') % (server, run, dataset, folder))
+    if(run==0):
+        datareq = urllib2.Request(('%s/data/json/live/%s/Global/%s/%s?rootcontent=1') % (server, run, dataset, folder))
+    else:
+        datareq = urllib2.Request(('%s/data/json/archive/%s/Global/%s/%s?rootcontent=1') % (server, run, dataset, folder))
 #    print '%s/data/json/archive/%s/%s/%s%s' % (server, run, dataset, folder, postfix)
     datareq.add_header('User-agent', ident)
     # Get data
