@@ -22,16 +22,17 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	topeople = ['gflouris@cern.ch']
 
 	if( isSMS ):
-		topeople = ['0041764875503@mail2sms.cern.ch', '0041764872389@mail2sms.cern.ch']
+		#topeople = ['0041764875503@mail2sms.cern.ch', '0041764872389@mail2sms.cern.ch']
+		topeople = ['0041754117422@mail2sms.cern.ch']
 
 
 	msg = MIMEMultipart()
 	msg['From'] = me
 	msg['To']   = COMMASPACE.join(topeople)
-	msg['Subject'] = 'TKDoc Notification: RUN ' + str(DQMMon.runinfo['run'])	
+	msg['Subject'] = 'TK Notification: RUN ' + str(DQMMon.runinfo['run'])	
 	
 	if(Text!=None):
-		msg['Subject'] = "TKDoc Notification - Application stopped."
+		msg['Subject'] = "TK Notification - Application stopped."
 		emailmessage = Text
 
 
