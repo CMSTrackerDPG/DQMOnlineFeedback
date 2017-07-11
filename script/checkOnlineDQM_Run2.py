@@ -28,19 +28,26 @@ def PrintAlarm(DQMMon):
         print("=========================================")
 
 
+run_proc = 0
 
 while True:
 
-    time.sleep(5)
+    time.sleep(60)
     DQMMon = DQMInterface(serverurl, 0) #Run=0 it takes the latest run
-
 
     if(DQMMon.onlinePublishing):
 
         DQMMon.getRunInfo()
         DQMMon.getdeadRocTrendLayer_1()
         DQMMon.getIsDataPresent()
-        #DQMMon.refresh()
+      
+        if(DQMMon.runinfo['lumi'] < 4 ):
+            continue
+
+        if(DQMMon.runinfo['run']!=run_proc):
+               print("Proceesing run: "+str(DQMMon.runinfo['run']))
+        run_proc = DQMMon.runinfo['run']
+
 
         if(DQMMon.runinfo['beamMode']=='stable' and DQMMon.runinfo['run_type']=='pp_run' and (DQMMon.dead_value>70 or DQMMon.isDataPresent==False)):
             #Run is written in db only if the sms/email has been sent
@@ -49,11 +56,11 @@ while True:
 
             if(alarm_handled!=1):
                 PrintAlarm(DQMMon)
-                #print("alarm_not_handled")
+
                 dbcursor.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, 1);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value))
                 conn.commit()
                 send_mail(DQMMon)
-                #send_mail(DQMMon, isSMS=True) #sendsms
+                send_mail(DQMMon, isSMS=True) #sendsms
 
                 ###Checks to avoid spam
                 now = datetime.datetime.now()
