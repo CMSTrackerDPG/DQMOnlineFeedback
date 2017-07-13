@@ -11,7 +11,7 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	COMMASPACE = ', '
 
 
-	emailmessage = "Alarm from Online DQM\n Run:   "+ str(DQMMon.runinfo['run']) +"\n LumiSection:  "+str(DQMMon.runinfo['lumi']) +"\n Beam Mode:  "+str(DQMMon.runinfo['beamMode'])+"\n Numer of Dead ROC: "+str(DQMMon.dead_value)+"\n DataPresent: True"
+	emailmessage = "Alarm from Online DQM\n Run:   "+ str(DQMMon.runinfo['run']) +"\n LumiSection:  "+str(DQMMon.runinfo['lumi']) +"\n Beam Mode:  "+str(DQMMon.runinfo['beamMode'])+"\n Numer of Dead ROC: "+str(DQMMon.dead_value)+"\n DataPresent: "+str(DQMMon.isDataPresent)
 
 	server = "localhost"
 	#me = 'cctrack@mail.cern.ch'

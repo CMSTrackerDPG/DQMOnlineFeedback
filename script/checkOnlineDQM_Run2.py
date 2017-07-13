@@ -1,9 +1,9 @@
+#!/usr/bin/env python
 from DQMInterface import *
 from mimeemail import *
 import sqlite3
 import datetime
 import time
-
 
 conn = sqlite3.connect('alarms_log.db')
 dbcursor = conn.cursor()
@@ -32,11 +32,9 @@ run_proc = 0
 
 while True:
 
-    time.sleep(60)
     DQMMon = DQMInterface(serverurl, 0) #Run=0 it takes the latest run
-
     if(DQMMon.onlinePublishing):
-
+        DQMMon.refresh()
         DQMMon.getRunInfo()
         DQMMon.getdeadRocTrendLayer_1()
         DQMMon.getIsDataPresent()
@@ -73,3 +71,4 @@ while True:
                 if(alarms_in_hour>3):
                     send_mail(DQMMon, Text="Application stopped. Number of alarms in an hour exceeded the limit. \nCheck manually.")
                     quit()
+    time.sleep(50)

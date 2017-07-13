@@ -14,10 +14,10 @@ class DQMInterface():
         self.data_EventInfo = {}
         self.data_LhcInfo = {}
         self.onlinePublishing = False
-        self()
+        self.data_EventInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/SiStrip/EventInfo", False)
+        self.onlinePublishing = self.isOnlinePublishing()
 
     def __call__(self):
-        self.data_EventInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/SiStrip/EventInfo", False)
         self.data_LhcInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/LhcInfo", True)
         self.data_InfoLayouts = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/Layouts", False)
         self.data_PixelPh1 = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
@@ -46,7 +46,7 @@ class DQMInterface():
 
     def getdeadRocTrendLayer_1(self):
         #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
-        self.dead_value = self.data_PixelPh1['deadRocTrendLayer_2']['rootobj'].GetBinContent(self.data_PixelPh1['deadRocTrendLayer_2']['rootobj'].FindBin(float(self.runinfo['lumi'])))
+        self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])))
 
     def getIsDataPresent(self):
         #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1/Phase1_MechanicalView", True)
