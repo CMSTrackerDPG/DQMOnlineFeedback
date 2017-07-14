@@ -5,13 +5,22 @@ import sqlite3
 import datetime
 import time
 
-conn = sqlite3.connect('alarms_log.db')
+conn = sqlite3.connect('logbook.db')
 dbcursor = conn.cursor()
+#try:
+#dbcursor.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE id=1 )')
+# except sqlite3.Error as exerror:
+#     if(exerror):
+#         dbcursor.execute('''CREATE TABLE alarms(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
+#         dbcursor.execute('''CREATE TABLE processed_runs(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
 try:
     dbcursor.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE id=1 )')
+    dbcursor.execute('SELECT EXISTS(SELECT 1 FROM processed_runs WHERE id=1 )')
 except sqlite3.Error as exerror:
     if(exerror):
+        print("Creating tables")
         dbcursor.execute('''CREATE TABLE alarms(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
+        dbcursor.execute('''CREATE TABLE processed_runs(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
 
 serverurl = 'https://cmsweb.cern.ch/dqm/online'
 
@@ -28,26 +37,32 @@ def PrintAlarm(DQMMon):
         print("=========================================")
 
 
-run_proc = 0
 
-while True:
 
-    DQMMon = DQMInterface(serverurl, 0) #Run=0 it takes the latest run
-    if(DQMMon.onlinePublishing):
-        DQMMon.refresh()
-        DQMMon.getRunInfo()
+DQMMon = DQMInterface(serverurl, 0) #Run=0 it takes the latest run
+
+if(DQMMon.onlinePublishing):
+
+    DQMMon.refresh()
+    DQMMon.getRunInfo()
+
+    #PrintAlarm(DQMMon)
+    if(DQMMon.runinfo['lumi'] < 4 or DQMMon.runinfo['beamMode']!='stable' or DQMMon.runinfo['run_type']!='pp_run'):
+        pass
+
+    else:
         DQMMon.getdeadRocTrendLayer_1()
         DQMMon.getIsDataPresent()
-      
-        if(DQMMon.runinfo['lumi'] < 4 ):
-            continue
 
-        if(DQMMon.runinfo['run']!=run_proc):
-               print("Proceesing run: "+str(DQMMon.runinfo['run']))
-        run_proc = DQMMon.runinfo['run']
+        dbcursor.execute('SELECT EXISTS(SELECT 1 FROM processed_runs WHERE run="%s" )' % DQMMon.runinfo['run'])
+        run_processed, = dbcursor.fetchone()
+        if(run_processed!=1):
+            dbcursor.execute("INSERT INTO processed_runs(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, ?);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value, DQMMon.isDataPresent))
+            conn.commit()
 
 
-        if(DQMMon.runinfo['beamMode']=='stable' and DQMMon.runinfo['run_type']=='pp_run' and (DQMMon.dead_value>70 or DQMMon.isDataPresent==False)):
+
+        if( (DQMMon.dead_value>70 or DQMMon.isDataPresent==False)):
             #Run is written in db only if the sms/email has been sent
             dbcursor.execute('SELECT EXISTS(SELECT 1 FROM alarms WHERE run="%s" )' % DQMMon.runinfo['run'])
             alarm_handled, = dbcursor.fetchone()
@@ -55,20 +70,7 @@ while True:
             if(alarm_handled!=1):
                 PrintAlarm(DQMMon)
 
-                dbcursor.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, 1);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value))
+                dbcursor.execute("INSERT INTO alarms(date, run, lumi, dead_value, DataPresent) VALUES (?, ? , ? , ?, ?);",(datetime.datetime.now(), DQMMon.runinfo['run'], DQMMon.runinfo['lumi'], DQMMon.dead_value, DQMMon.isDataPresent))
                 conn.commit()
                 send_mail(DQMMon)
                 send_mail(DQMMon, isSMS=True) #sendsms
-
-                ###Checks to avoid spam
-                now = datetime.datetime.now()
-                onehour = datetime.timedelta(hours=1)
-                onehour_ago = now - onehour
-
-                dbcursor.execute("SELECT COUNT(*) FROM alarms WHERE date BETWEEN ? AND ? ", (onehour_ago, now))
-                alarms_in_hour, = dbcursor.fetchone()
-                print("Alarms "+str(alarms_in_hour))
-                if(alarms_in_hour>3):
-                    send_mail(DQMMon, Text="Application stopped. Number of alarms in an hour exceeded the limit. \nCheck manually.")
-                    quit()
-    time.sleep(50)
