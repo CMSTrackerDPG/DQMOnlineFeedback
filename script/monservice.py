@@ -2,8 +2,9 @@
 import datetime
 import time
 import os
-import checkOnlineDQM_Run2
+#import checkOnlineDQM_Run2
 import sqlite3
+from mimeemail import *
 
 
 conn = sqlite3.connect('logbook.db')
@@ -14,14 +15,19 @@ itr = 0
 run_proc = 0
 
 while True: 
+
+
+
 	os.system("python checkOnlineDQM_Run2.py")
 
 	dbcursor.execute("SELECT * FROM processed_runs ORDER BY id DESC LIMIT 1")
 	result = dbcursor.fetchone()
 
-	if(run_proc!=result[2]):
-		run_proc = result[2]
-		print("Proceesing run: "+str(result[2]))
+	if(result!=None):
+		if(run_proc!=result[2]):
+			run_proc = result[2]
+			print("Proceesing run: "+str(result[2]))
+
 
 	###Checks to avoid spam
 	now = datetime.datetime.now()
@@ -32,11 +38,11 @@ while True:
 	alarms_in_hour, = dbcursor.fetchone()
 	#print("Alarms "+str(alarms_in_hour))
 	if(alarms_in_hour>3):
-	    send_mail(DQMMon, Text="Application stopped. Number of alarms in an hour exceeded the limit. \nCheck manually.")
+	    send_mail(None, Text="Application stopped. Number of alarms in an hour exceeded the limit. \nCheck manually.")
 	    quit()
 
 	#itr = itr +1
 	#if(itr==20):
 	#	exit()
-	time.sleep(0)
+	time.sleep(30)
 	
