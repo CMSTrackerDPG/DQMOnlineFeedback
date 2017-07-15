@@ -10,8 +10,8 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 
 	COMMASPACE = ', '
 
-
-	emailmessage = "Alarm from Online DQM\n Run:   "+ str(DQMMon.runinfo['run']) +"\n LumiSection:  "+str(DQMMon.runinfo['lumi']) +"\n Beam Mode:  "+str(DQMMon.runinfo['beamMode'])+"\n Numer of Dead ROC: "+str(DQMMon.dead_value)+"\n DataPresent: "+str(DQMMon.isDataPresent)
+	if(DQMMon!=None):
+		emailmessage = "Alarm from Online DQM\nRun:   "+ str(DQMMon.runinfo['run']) +"\nLumiSection:  "+str(DQMMon.runinfo['lumi']) +"\nNumer of Dead ROC: "+str(DQMMon.dead_value)+"\nDataPresent: "+str(DQMMon.isDataPresent)
 
 	server = "localhost"
 	#me = 'cctrack@mail.cern.ch'
@@ -29,7 +29,8 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	msg = MIMEMultipart()
 	msg['From'] = me
 	msg['To']   = COMMASPACE.join(topeople)
-	msg['Subject'] = 'TK Notification: RUN ' + str(DQMMon.runinfo['run'])	
+	if(DQMMon!=None):
+		msg['Subject'] = 'TK Notification: RUN ' + str(DQMMon.runinfo['run'])	
 	
 	if(Text!=None):
 		msg['Subject'] = "TK Notification - Application stopped."
