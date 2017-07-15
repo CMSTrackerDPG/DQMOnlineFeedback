@@ -59,6 +59,8 @@ class DQMInterface():
     def getIsDataPresent(self):
         #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1/Phase1_MechanicalView", True)
         ndigis = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])))
+        ndigism1 = 0
+	ndigism2 = 0
         if(self.runinfo['lumi']>7):
             ndigism1 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-1))
             ndigism2 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-2))
