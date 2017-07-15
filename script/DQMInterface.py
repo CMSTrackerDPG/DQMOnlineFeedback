@@ -1,5 +1,5 @@
 from dqmjson_online import *
-
+import math
 
 class DQMInterface():
     def __init__(self, serverurl, RunNumber = 0) :
@@ -14,15 +14,16 @@ class DQMInterface():
         self.data_EventInfo = {}
         self.data_LhcInfo = {}
         self.onlinePublishing = False
-        self.data_EventInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/SiStrip/EventInfo", False)
-        self.onlinePublishing = self.isOnlinePublishing()
+        #self.data_EventInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/SiStrip/EventInfo", False)
+        #self.onlinePublishing = self.isOnlinePublishing()
+        self()
 
     def __call__(self):
-        self.data_LhcInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/LhcInfo", True)
+        self.data_EventInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/SiStrip/EventInfo", False)
         self.data_InfoLayouts = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/Layouts", False)
         self.data_PixelPh1 = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
         self.data_PixelPh1MV = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1/Phase1_MechanicalView", True)
-
+        self.data_LhcInfo = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/LhcInfo", True)
         self.onlinePublishing = self.isOnlinePublishing()
 
     def refresh(self):
@@ -35,23 +36,34 @@ class DQMInterface():
         return status
 
     def getRunInfo(self):
-        lumi = self.data_EventInfo['iLumiSection']['value']
+        ##Monitor (lumi - 1) -- Ensures that the plots are filled
+        lumi = float(self.data_EventInfo['iLumiSection']['value']) - 1
         run  = self.data_EventInfo['iRun']['value']
         value_at_lumi = self.data_LhcInfo['beamMode']['rootobj'].GetBinContent(self.data_LhcInfo['beamMode']['rootobj'].FindBin(float(lumi)))
         beamMode = self.data_LhcInfo['beamMode']['rootobj'].GetYaxis().GetBinLabel(int(value_at_lumi))
-        #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/Layouts", True)
+                #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/Layouts", True)
         run_type = self.data_InfoLayouts['Run Type']['value']
         self.runinfo = {"run": run, "lumi": lumi, "beamMode": beamMode, "run_type": run_type}
 
 
     def getdeadRocTrendLayer_1(self):
         #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
-        self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])))
+        ##Round lumisection to the nearest ten due to binning of the deadROC histogram
+        #print(self.runinfo['lumi'])
+        lumi_round10 = int(math.floor(self.runinfo['lumi']/10.)*10)
+        #print(lumi_round10)
+        bin_at_lumi = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(lumi_round10)) - 1
+        #print(bin_at_lumi)
+        self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(bin_at_lumi)
 
     def getIsDataPresent(self):
         #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1/Phase1_MechanicalView", True)
         ndigis = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])))
-        if(ndigis==0):
+        if(self.runinfo['lumi']>7):
+            ndigism1 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-1))
+            ndigism2 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-2))
+
+        if(ndigis==0 and ndigism1==0 and ndigism2==0):
             self.isDataPresent = False
-        elif(ndigis>0):
+        else:
             self.isDataPresent = True
