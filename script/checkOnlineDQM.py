@@ -17,7 +17,7 @@ from email import Encoders
 
 parser = OptionParser()
 #parser.add_option("-p", "--process", dest="process", default="Run2011A-PromptReco-v4", help="Era and processing to consider")
-#parser.add_option("-o", "--out", dest="out", default="CheckOnlineDQM.root", help="Output file") 
+#parser.add_option("-o", "--out", dest="out", default="CheckOnlineDQM.root", help="Output file")
 (options, args) = parser.parse_args()
 
 ofile = open("ReportFromOnlineDQM.txt","w")
@@ -91,9 +91,9 @@ def checksubdet(x, y, report, nlayer, value):
     if x == 3: det = 'TIB'
     if x == 4: det = 'TIDMinus'
     if x == 5: det = 'TIDPlus'
-    if x == 6: det = 'TOB'    
+    if x == 6: det = 'TOB'
     if report.GetName()=="detFractionReportMap":
-        Detproblem += "Problem in Fraction of Good Modules in " + det + " Layer " + str(y) + " Value: %.4f \n" % float(value) 
+        Detproblem += "Problem in Fraction of Good Modules in " + det + " Layer " + str(y) + " Value: %.4f \n" % float(value)
         DetproblemSMS += "Problem in " + det + str(y) + ":%.3f\n" % float(value)
     else:
         if nlayer == 1:
@@ -127,7 +127,7 @@ def getpixelstriphv(ls):
         stripHv *= summary.GetBinContent(summary.FindBin( thisls , 19 )) * summary.GetBinContent(summary.FindBin( thisls , 20 )) * summary.GetBinContent(summary.FindBin( thisls , 21 )) * summary.GetBinContent(summary.FindBin( thisls , 22 ))
         pixelHv *= summary.GetBinContent(summary.FindBin( thisls , 16 )) * summary.GetBinContent(summary.FindBin( thisls , 17 ))
 
-            
+
 def getstripdata(ls):
     if (ls >= 2500):
         print "strip data: too high LS number"
@@ -142,11 +142,11 @@ def getstripdata(ls):
             lastfilledLS = thisls
 
     #analyze activity
-    global isActiveTOB     
-    global isActiveTIDPlus 
+    global isActiveTOB
+    global isActiveTIDPlus
     global isActiveTIDMinus
-    global isActiveTIB     
-    global isActiveTECPlus 
+    global isActiveTIB
+    global isActiveTECPlus
     global isActiveTECMinus
     #check if the detector is sending data (flag 1), or not (flag 0.01). To ignore missing LS in online DQM, also check empty bins (flag 0) - do not consider them as TRK not active!
     #TID+-
@@ -155,7 +155,7 @@ def getstripdata(ls):
             isActiveTIDMinus = True
         if dataPlot.GetBinContent( thisls , 5 ) == 1 or dataPlot.GetBinContent( thisls , 5 ) == 0:
             isActiveTIDPlus = True
-    #other partitions            
+    #other partitions
     for thisls in range(lastfilledLS - 1 , lastfilledLS):
         if dataPlot.GetBinContent( thisls , 1 ) == 1 or dataPlot.GetBinContent( thisls , 1 ) == 0:
             isActiveTECMinus = True
@@ -165,7 +165,7 @@ def getstripdata(ls):
             isActiveTIB = True
         if dataPlot.GetBinContent( thisls , 6 ) == 1 or dataPlot.GetBinContent( thisls , 6 ) == 0:
             isActiveTOB = True
-        
+
 def getmodulelistdict(moduledir):
     allmodules = []
     allmodulevalues = []
@@ -183,7 +183,7 @@ def getmodulelistdict(moduledir):
 #        print something + " " + saved_reason + " " + str(reason)
     modules = dict( zip ( allmodules , allmodulevalues ) )
     return modules
-            
+
 def getmodulereasonsdict(moduledir):
     allmodules = []
     allmodulereasons = []
@@ -194,7 +194,7 @@ def getmodulereasonsdict(moduledir):
         allmodulereasons.append(reason)
     modules = dict( zip ( allmodules , allmodulereasons ) )
     return modules
-            
+
 
 def isOnlinePublishing():
     status = True
@@ -233,7 +233,7 @@ def getTrivials():
     print "BadMajorityAddressesYMean = ", BadMajorityAddressesYMean
     if nactivebins > 5:
         BadMajorityAddressesFEDs = '0'
-                            
+
     data = dqm_get_json(serverurl, 0 , "/Online/ALL", '/SiStrip/EventInfo', True)
     RunNumber = int(data['iRun']['value'])
     LumiSection = int(data['iLumiSection']['value'])
@@ -256,7 +256,7 @@ def getTrivials():
             RunType = 'Cosmics'
         else:
             RunType = 'Commissioning'
-    
+
     #get beam mode
     data = dqm_get_json(serverurl, 0 , "/Online/ALL", '/Info/LhcInfo', True)
     beamsetupHisto = data['beamMode']['rootobj']
@@ -267,7 +267,7 @@ def getTrivials():
     lhcfillHisto = data['lhcFill']['rootobj']
     FillNumber = int(lhcfillHisto.GetBinContent ( LumiSection-1 ))
 
-def getnFEDErrors():    
+def getnFEDErrors():
     fld = '/SiStrip/ReadoutView/FED'
     data = dqm_get_json(serverurl, str(RunNumber), "/Online/ALL", fld, True)
     return float(data['nFEDErrors']['rootobj'].GetMean())
@@ -279,7 +279,7 @@ def getnBadChannels():
     data = dqm_get_json(serverurl, str(RunNumber), "/Online/ALL", fld, True)
     BadChannels = float(data['nBadChannelStatusBits']['rootobj'].GetMean())
     BadActiveChannels = float(data['nBadActiveChannelStatusBits']['rootobj'].GetMean())
-    
+
 
 def getFETimeDiff(plot):
     fld = '/SiStrip/ReadoutView/FE/APVe'
@@ -320,7 +320,7 @@ if ( localtime[3] == 12 and localtime[4] > 29 and localtime[4] < 34 ):
 ofilehbsms = open("sendheartbeatsms.txt","w")
 ofilehbsms.write(str(sendHB_SMS)+"\n")
 ofilehbsms.close()
-    
+
 if isOnlinePublishing() == False:
     print "No online publishing."
     ofilee = open("sendemail.txt","w")
@@ -424,7 +424,7 @@ ofile_SMS.write( "R" + str(RunNumber) + ",LS" + str(LumiSection) + ":\n" )
 #        detAffected += " TEC-"
 #    if ( isActiveTOB == False and isActiveTIDPlus == False and isActiveTIDMinus == False and isActiveTIB == False and isActiveTECPlus == False and isActiveTECMinus == False ):
 #        detAffected += ": is HV on?"
-#    ofile.write(str(detAffected)+"\n")                
+#    ofile.write(str(detAffected)+"\n")
 #    ofile_SMS.write(str(detAffected)+"\n")
 #    isProblem = 1
 #    isProblemSMS = 1
@@ -450,17 +450,17 @@ if ((nFEDErr > int(fed_limits['federrors']) ) or (BadChannels > int(fed_limits['
     ofile.write( "Check: FED errors \n")
     ofile.write("\n")
     if ( nFEDErr > int(fed_limits['federrors']) ):
-        ofile.write("Large number of FED with errors: %.2f\n" % float(nFEDErr))                
+        ofile.write("Large number of FED with errors: %.2f\n" % float(nFEDErr))
         ofile_SMS.write( "FEDErrors:%.2f\n" % float(nFEDErr))
         isFEDProblem = 1
         if ( isAllFEDsInError == 1 ):
-            isFEDProblem = 2            
+            isFEDProblem = 2
     if ( BadChannels > int(fed_limits['badchannels']) ):
-        ofile.write("Large number of Bad Channels: " + str(BadChannels)+"\n")                
+        ofile.write("Large number of Bad Channels: " + str(BadChannels)+"\n")
         ofile_SMS.write( "BadChannels:" + str(BadChannels) + "\n" )
         isChannelProblem = 1
     if ( BadActiveChannels > int(fed_limits['badactivechannels']) ):
-        ofile.write("Large number of Bad Active Channels: " + str(BadActiveChannels)+"\n")                
+        ofile.write("Large number of Bad Active Channels: " + str(BadActiveChannels)+"\n")
         ofile_SMS.write( "BadActiveChannels:" + str(BadActiveChannels) + "\n" )
         isActiveChannelProblem = 1
     ofile.write("\n")
@@ -484,9 +484,9 @@ if ( wasAPVeTimingProblem == 0 ):
         fractionOfAffectedEvents = min ( float(BadMajorityAddressesYMean/ProcessedEvents*100.), 100.0 )
         ofile.write( " - observed in approx. %.1f%% of processed events (~%i events)\n" % ( fractionOfAffectedEvents, int(round(BadMajorityAddressesYMean)) ))
         if BadMajorityAddressesFEDs != '0':
-            ofile.write( " - FEDs with bad majority APV addresses: " + BadMajorityAddressesFEDs + "\n" ) 
+            ofile.write( " - FEDs with bad majority APV addresses: " + BadMajorityAddressesFEDs + "\n" )
         ofile.write( "-------------------------------------------- \n" )
-    
+
 if ( stripHv == 1 and wasDetFractionProblem == 0 and RunType.lower() != 'commissioning' ):
     print "HERE OK"
     data = dqm_get_json(serverurl, str(RunNumber), "/Online/ALL", '/SiStrip/MechanicalView', True)
@@ -537,7 +537,7 @@ if ( stripHv == 1 and wasDetFractionProblem == 0 and RunType.lower() != 'commiss
             if ( xbin == 6 and ybin == 6 and dqm < float(gooddet_limits['tob6']) ): isbad = 1
 
             if ( isbad == 1 ):
-                nbadlayer1 = nbadlayer1 + 1            
+                nbadlayer1 = nbadlayer1 + 1
                 checksubdet(xbin, ybin, report1, nbadlayer1, dqm)
                 isDetFractionProblem = 1
 
@@ -602,7 +602,7 @@ if ( ( isDetFractionProblem == 1 ) or ( isDetStoNProblem == 1 ) ):
     ofile.write("-------------------------------------------- \n")
     ofile_SMS.write(DetproblemSMS)
     ofile_SMS.write(StoNproblemSMS)
-    
+
 
 if ( stripHv == 1 and pixelHv == 1 and wasTkProblem == 0 and RunType.lower() == 'collisions' ):
     fld = '/Tracking/EventInfo'
@@ -613,7 +613,7 @@ if ( stripHv == 1 and pixelHv == 1 and wasTkProblem == 0 and RunType.lower() == 
     for xbin in range(1, nbinX):
         for ybin in range(1, nbinY):
             tkvalue = tracking.GetBinContent(xbin,ybin)
-            if ( tkvalue < -0.5 and ( xbin == 1 or xbin == 2 or xbin == 3 ) ): continue        
+            if ( tkvalue < -0.5 and ( xbin == 1 or xbin == 2 or xbin == 3 ) ): continue
 
             if ( xbin == 1 and tkvalue < float(track_limits['trackchi2']) ):
                 Tkproblem += "Problem in Track reconstruction (chi2): %.4f\n" % float(tkvalue)
@@ -722,7 +722,7 @@ for mod in old_tob_json:
     modulesTOB_old.append(str(mod))
 
 ofile_modules = open( module_filename ,"w")
-    
+
 #drop the full lists into files for later comparison
 ofile_modules.write(json.dumps(modulesTECMinus)+"\n")
 ofile_modules.write(json.dumps(modulesTECPlus)+"\n")
@@ -730,7 +730,7 @@ ofile_modules.write(json.dumps(modulesTIB)+"\n")
 ofile_modules.write(json.dumps(modulesTIDMinus)+"\n")
 ofile_modules.write(json.dumps(modulesTIDPlus)+"\n")
 ofile_modules.write(json.dumps(modulesTOB)+"\n")
-    
+
 #compare old modules with new list, keep only outliers
 for thismodule in modulesTECPlus_old:
     if str(int(thismodule)) in modulesTECPlus:
@@ -745,7 +745,7 @@ for thismodule in modulesTECMinus_old:
         del allNBMMap[str(int(thismodule))]
     else:
         modulesTECMinus_recovered.append(thismodule)
-        
+
 for thismodule in modulesTIB_old:
     if str(int(thismodule)) in modulesTIB:
         modulesTIB.remove( str(int(thismodule)) )
@@ -784,7 +784,7 @@ n_mTotal = n_mTECp + n_mTECm + n_mTIB + n_mTIDp + n_mTIDm + n_mTOB
 
 module_limit = int(newbadmod_limits['newbadmodules'])
 isBadModuleProblem = 0
-    
+
 if ( ( n_mTECp > module_limit ) or ( n_mTECm > module_limit ) or ( n_mTIB > module_limit ) or ( n_mTIDp > module_limit ) or ( n_mTIDm > module_limit ) or ( n_mTOB > module_limit ) ):
     isProblem = 1
     isBadModuleProblem = 1
@@ -799,7 +799,7 @@ if ( ( n_mTECp > module_limit ) or ( n_mTECm > module_limit ) or ( n_mTIB > modu
     ofile.write("TIDMinus: "+str(n_mTIDm)+"\n")
     ofile.write("TOB: "+str(n_mTOB)+"\n")
 #    ofile.write("Link to the current bad-module tracker map: http://vocms01/event_display/TkDocFeedback/newbadmodules_tkmap.png"+"\n\n")
-    
+
     ofile.write("\nBad module details:\n\n")
     if n_mTotal < 1000:
         if ( len(modulesTECPlus) > 0 ):
@@ -984,4 +984,4 @@ ofile_reference.write(str(isTkProblem)+"\n")
 ofile_reference.write(str(isNoStripDataProblem)+"\n")
 ofile_reference.close()
 
-print "Analysis completed" 
+print "Analysis completed"
