@@ -34,37 +34,36 @@ class DQMInterface():
         return status
 
     def getRunInfo(self):
-        ##Monitor (lumi - 1) -- Ensures that the plots are filled
         try:
+            ##Monitor (lumi - 1) -- Ensures that the plots are filled
             lumi = float(self.data_EventInfo['iLumiSection']['value']) - 1
             run  = self.data_EventInfo['iRun']['value']
             value_at_lumi = self.data_LhcInfo['beamMode']['rootobj'].GetBinContent(self.data_LhcInfo['beamMode']['rootobj'].FindBin(float(lumi)))
             beamMode = self.data_LhcInfo['beamMode']['rootobj'].GetYaxis().GetBinLabel(int(value_at_lumi))
-                    #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/Info/Layouts", True)
             run_type = self.data_InfoLayouts['Run Type']['value']
             self.runinfo = {"run": run, "lumi": lumi, "beamMode": beamMode, "run_type": run_type}
         except KeyError, e:
             print("getRunInfo KeyError "+str(e))
 
     def getdeadRocTrendLayer_1(self):
-        #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1", True)
-        ##Round lumisection to the nearest ten due to binning of the deadROC histogram
-        #print(self.runinfo['lumi'])
         try:
-            lumi_round10 = int(math.floor(self.runinfo['lumi']/10.)*10)
-            bin_at_lumi = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(lumi_round10)) - 1
-            self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(bin_at_lumi)
+            if(self.runinfo['lumi']>40):
+                bin_at_lumi = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])) - 1 
+                self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(bin_at_lumi)
+            else:
+                self.dead_value = 0
         except KeyError, e:
             print ("getdeadRocTrendLayer_1 KeyError "+str(e))
             self.dead_value = 0
 
     def getIsDataPresent(self):
         try:
-            #data = dqm_get_json(self.serverurl, self.RunNumber , "/Online/ALL", "/PixelPhase1/Phase1_MechanicalView", True)
             ndigis = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])))
             ndigism1 = 0
             ndigism2 = 0
-            if(self.runinfo['lumi']>7):
+            ##Tools start monitoring at LS=4, + 2 LS for digimon
+            ##Check if 3 consecutive LS are empty. Avoid false alarms. 
+            if(self.runinfo['lumi']>=6):
                 ndigism1 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-1))
                 ndigism2 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-2))
 
