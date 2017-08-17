@@ -1,5 +1,7 @@
 from dqmjson_online import *
 import math
+from utils import WriteOut
+
 
 class DQMInterface():
     def __init__(self, serverurl, RunNumber = 0) :
@@ -43,17 +45,17 @@ class DQMInterface():
             run_type = self.data_InfoLayouts['Run Type']['value']
             self.runinfo = {"run": run, "lumi": lumi, "beamMode": beamMode, "run_type": run_type}
         except KeyError, e:
-            print("getRunInfo KeyError "+str(e))
+            WriteOut("getRunInfo KeyError "+str(e))
 
     def getdeadRocTrendLayer_1(self):
         try:
             if(self.runinfo['lumi']>40):
-                bin_at_lumi = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])) - 1 
+                bin_at_lumi = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].FindBin(float(self.runinfo['lumi'])) - 1
                 self.dead_value = self.data_PixelPh1['deadRocTrendLayer_1']['rootobj'].GetBinContent(bin_at_lumi)
             else:
                 self.dead_value = 0
         except KeyError, e:
-            print ("getdeadRocTrendLayer_1 KeyError "+str(e))
+            WriteOut ("getdeadRocTrendLayer_1 KeyError "+str(e))
             self.dead_value = 0
 
     def getIsDataPresent(self):
@@ -61,15 +63,20 @@ class DQMInterface():
             ndigis = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])))
             ndigism1 = 0
             ndigism2 = 0
+            ndigism3 = 0
+            ndigism4 = 0
+
             ##Tools start monitoring at LS=4, + 2 LS for digimon
-            ##Check if 3 consecutive LS are empty. Avoid false alarms. 
-            if(self.runinfo['lumi']>=6):
+            ##Check if 3 consecutive LS are empty. Avoid false alarms.
+            if(self.runinfo['lumi']>=10):
                 ndigism1 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-1))
                 ndigism2 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-2))
+                ndigism3 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-3))
+                ndigism4 = self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].GetBinContent(self.data_PixelPh1MV['num_digis_per_Lumisection_PXBarrel']['rootobj'].FindBin(float(self.runinfo['lumi'])-4))
 
-            if(ndigis==0 and ndigism1==0 and ndigism2==0):
+            if(ndigis==0 and ndigism1==0 and ndigism2==0 and ndigism3==0 and ndigism4==0):
                 self.isDataPresent = False
             else:
                 self.isDataPresent = True
         except KeyError, e:
-            print("getIsDataPresent KeyError "+str(e))
+            WriteOut("getIsDataPresent KeyError "+str(e))

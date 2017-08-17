@@ -2,10 +2,11 @@
 import datetime
 import time
 import os
+import sys
 #import checkOnlineDQM_Run2
 import sqlite3
 from mimeemail import *
-
+from utils import WriteOut
 
 conn = sqlite3.connect('logbook.db')
 dbcursor = conn.cursor()
@@ -14,7 +15,8 @@ dbcursor = conn.cursor()
 itr = 0
 run_proc = 0
 
-while True: 
+WriteOut("Monitoring service")
+while True:
 
 
 
@@ -26,7 +28,7 @@ while True:
 	if(result!=None):
 		if(run_proc!=result[2]):
 			run_proc = result[2]
-			print("Proceesing run: "+str(result[2]))
+			WriteOut("Proceesing run: "+str(result[2]))
 
 
 	###Checks to avoid spam
@@ -45,4 +47,3 @@ while True:
 	#if(itr==20):
 	#	exit()
 	time.sleep(30)
-	
