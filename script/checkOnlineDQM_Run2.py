@@ -4,6 +4,7 @@ from mimeemail import *
 import sqlite3
 import datetime
 import time
+from utils import WriteOut
 
 conn = sqlite3.connect('logbook.db')
 dbcursor = conn.cursor()
@@ -18,7 +19,7 @@ try:
     dbcursor.execute('SELECT EXISTS(SELECT 1 FROM processed_runs WHERE id=1 )')
 except sqlite3.Error as exerror:
     if(exerror):
-        print("Creating tables")
+        WriteOut("Creating tables")
         dbcursor.execute('''CREATE TABLE alarms(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
         dbcursor.execute('''CREATE TABLE processed_runs(id integer PRIMARY KEY,date, run int, lumi int, dead_value int, DataPresent)''')
 
@@ -27,14 +28,14 @@ serverurl = 'https://cmsweb.cern.ch/dqm/online'
 
 def PrintAlarm(DQMMon):
 
-        print("=========================================")
-        print(DQMMon.runinfo['run'])
-        print(DQMMon.runinfo['lumi'])
-        print(DQMMon.runinfo['beamMode'])
-        print(DQMMon.runinfo['run_type'])
-        print(DQMMon.dead_value)
-        print("isDataPresent "+str(DQMMon.isDataPresent))
-        print("=========================================")
+        WriteOut("=========================================")
+        WriteOut(DQMMon.runinfo['run'])
+        WriteOut(DQMMon.runinfo['lumi'])
+        WriteOut(DQMMon.runinfo['beamMode'])
+        WriteOut(DQMMon.runinfo['run_type'])
+        WriteOut(DQMMon.dead_value)
+        WriteOut("isDataPresent "+str(DQMMon.isDataPresent))
+        WriteOut("=========================================")
 
 
 

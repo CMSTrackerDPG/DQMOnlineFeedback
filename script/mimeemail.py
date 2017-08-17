@@ -18,8 +18,8 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	me = 'gflouris@cern.ch'
     #### List of emails that receive this email
 	#topeople = ['threus@cern.ch','cms-tracker-doc@cern.ch','francesco.palmonari@cern.ch','mia.tosi@cern.ch','erik.butz@cern.ch','Christian.Barth@cern.ch']
-	
-	topeople = ['gflouris@cern.ch']
+
+	topeople = ['cms-trk-dqm-online-feedback@cern.ch']
 
 	if( isSMS ):
 		#topeople = ['0041764875503@mail2sms.cern.ch', '0041764872389@mail2sms.cern.ch']
@@ -30,8 +30,8 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	msg['From'] = me
 	msg['To']   = COMMASPACE.join(topeople)
 	if(DQMMon!=None):
-		msg['Subject'] = 'TK Notification: RUN ' + str(DQMMon.runinfo['run'])	
-	
+		msg['Subject'] = 'TK Notification: RUN ' + str(DQMMon.runinfo['run'])
+
 	if(Text!=None):
 		msg['Subject'] = "TK Notification - Application stopped."
 		emailmessage = Text
@@ -50,4 +50,3 @@ def send_mail(DQMMon, Text = None, isSMS = False, attachement=None):
 	smtp = smtplib.SMTP(server)
 	smtp.sendmail(me, topeople, msg.as_string())
 	smtp.close()
-
